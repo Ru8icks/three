@@ -77,6 +77,7 @@ export class WeatherComponent implements OnInit, AfterViewInit {
     this.controls.autoRotate = true;
     this.controls.enableZoom = true;
     this.controls.enablePan = false;
+    
     this.controls.update();
   };
 
@@ -84,7 +85,7 @@ export class WeatherComponent implements OnInit, AfterViewInit {
     //* Scene
     //this.scene.background = new THREE.Color(0x7ED4D9)
     
-    this.scene.fog = new THREE.FogExp2(0x7ED4D9, 0.031);
+    this.scene.fog = new THREE.FogExp2(0x7ED4D9, 0.01);
     this.renderer.setClearColor(this.scene.fog.color);
     this.loaderGLTF.load('assets/cloud.gltf', (gltf: GLTF) => {
       this.model = gltf.scene.children[0];
@@ -94,6 +95,33 @@ export class WeatherComponent implements OnInit, AfterViewInit {
       this.model.position.multiplyScalar(-1);
       this.scene.add(this.model);
     });
+
+    // Smoke Loaders
+
+    this.loader.load("https://raw.githubusercontent.com/navin-navi/codepen-assets/master/images/smoke.png", (texture) =>{
+      const cloudGeo = new THREE.PlaneGeometry(500,500);
+      const cloudMaterial = new THREE.MeshLambertMaterial({
+        map:texture,
+        transparent: true
+   });
+
+  for(let p=0; p<50; p++) {
+    let cloud = new THREE.Mesh(cloudGeo, cloudMaterial);
+    cloud.position.set(
+      Math.random()*80 -40,
+      10,
+      Math.random()*50-50
+    );
+    cloud.rotation.x = 1.16;
+    cloud.rotation.y = -0.12;
+    cloud.rotation.z = Math.random()*2*Math.PI;
+    cloud.material.opacity = 0.55;
+    this.cloudParticles.push(cloud);
+    this.scene.add(cloud);
+   
+  }
+});
+
    
    
   
@@ -104,6 +132,7 @@ export class WeatherComponent implements OnInit, AfterViewInit {
     this.camera.position.z = 10;
     this.camera.position.y = 10;
     this.camera.position.x = 10;
+    
     
 
     let orangeLight = new THREE.PointLight(0xcc6600,50,450,1.7);
