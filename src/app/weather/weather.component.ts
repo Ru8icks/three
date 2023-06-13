@@ -1,29 +1,30 @@
+
 import { Component, OnInit, AfterViewInit, Input, ViewChild, ElementRef } from '@angular/core';
 import * as THREE from "three";
+import * as POSTPROCESSING from "postprocessing"
 import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 @Component({
-  selector: 'app-import',
-  templateUrl: './import.component.html',
-  styleUrls: ['./import.component.scss']
+  selector: 'app-weather',
+  templateUrl: './weather.component.html',
+  styleUrls: ['./weather.component.scss']
 })
-export class ImportComponent {
+export class WeatherComponent implements OnInit, AfterViewInit {
 
-  @Input() public fieldOfView: number = 10;
+  @Input() public fieldOfView: number = 60;
 
   @Input('nearClipping') public nearClippingPane: number = 1;
 
   @Input('farClipping') public farClippingPane: number = 1000;
 
-  //? Scene properties
+  // Scene properties
 
   @ViewChild('myCanvas', {static: true, read: ElementRef}) private canvas!: ElementRef<HTMLCanvasElement>;
   private renderer!: THREE.WebGLRenderer;
 
-  //private renderer: THREE.WebGLRenderer =  new THREE.WebGLRenderer();
-  //private canvas = this.renderer.domElement;
+
   private camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera(
     this.fieldOfView,
     window.innerWidth/ window.innerHeight,
@@ -32,6 +33,7 @@ export class ImportComponent {
   )
 
   private controls!: OrbitControls;
+  private composer!: POSTPROCESSING.EffectComposer;
 
   private ambientLight: THREE.AmbientLight  = new THREE.AmbientLight(0x00000, 100);;
 
@@ -47,12 +49,15 @@ export class ImportComponent {
 
   private directionalLight: THREE.DirectionalLight = new THREE.DirectionalLight(0xffdf04, 0.4);
 
-  //? Helper Properties (Private Properties);
+  // Helper Properties (Private Properties);
 
   private loaderGLTF = new GLTFLoader();
   
 
   private scene: THREE.Scene = new THREE.Scene();
+  private loader = new THREE.TextureLoader();
+  private cloudParticles:  THREE.Mesh<THREE.PlaneGeometry, THREE.MeshLambertMaterial>[] = []
+  
 
  
   private animateModel() {
@@ -77,8 +82,11 @@ export class ImportComponent {
 
   private createScene() {
     //* Scene
-    this.scene.background = new THREE.Color(0xd4d4d8)
-    this.loaderGLTF.load('assets/bomb.gltf', (gltf: GLTF) => {
+    //this.scene.background = new THREE.Color(0x7ED4D9)
+    
+    this.scene.fog = new THREE.FogExp2(0x7ED4D9, 0.031);
+    this.renderer.setClearColor(this.scene.fog.color);
+    this.loaderGLTF.load('assets/cloud.gltf', (gltf: GLTF) => {
       this.model = gltf.scene.children[0];
       console.log(this.model);
       var box = new THREE.Box3().setFromObject(this.model);
@@ -87,28 +95,36 @@ export class ImportComponent {
       this.scene.add(this.model);
     });
    
-    this.camera.position.x = 100;
-    this.camera.position.y = 100;
-    this.camera.position.z = 100;
-    this.scene.add(this.ambientLight);
-    this.directionalLight.position.set(0, 1, 0);
-    this.directionalLight.castShadow = true;
-    this.scene.add(this.directionalLight);
-    this.light1.position.set(0, 200, 400);
-    this.scene.add(this.light1);
-    this.light2.position.set(500, 100, 0);
-    this.scene.add(this.light2);
-    this.light3.position.set(0, 100, -500);
-    this.scene.add(this.light3);
-    this.light4.position.set(-500, 300, 500);
-    this.scene.add(this.light4);
+   
+  
+
+
+   
+   
+    this.camera.position.z = 10;
+    this.camera.position.y = 10;
+    this.camera.position.x = 10;
+    
+
+    let orangeLight = new THREE.PointLight(0xcc6600,50,450,1.7);
+    orangeLight.position.set(200,30,100);
+    this.scene.add(orangeLight);
+    
+    let redLight = new THREE.PointLight(0xd8547e,50,450,1.7);
+    redLight.position.set(100,30,100);
+    this.scene.add(redLight);
+    
+    let blueLight = new THREE.PointLight(0x3677ac,50,450,1.7);
+    blueLight.position.set(300,30,200);
+    this.scene.add(blueLight);
+    
   }
 
   private startRenderingLoop() {
     
     this.renderer.setPixelRatio(devicePixelRatio);
     this.renderer.setSize(this.canvas.nativeElement.clientWidth, this.canvas.nativeElement.clientHeight);
-    let component: ImportComponent = this;
+    let component: WeatherComponent = this;
     (function render() {
       component.renderer.render(component.scene, component.camera);
       component.animateModel();

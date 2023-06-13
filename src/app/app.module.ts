@@ -5,12 +5,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CubeComponent } from './cube/cube.component';
 import { ImportComponent } from './import/import.component';
+import { WeatherComponent } from './weather/weather.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CubeComponent,
-    ImportComponent
+    ImportComponent,
+    WeatherComponent
   ],
   imports: [
     BrowserModule,
